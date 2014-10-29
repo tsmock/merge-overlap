@@ -49,15 +49,16 @@ import org.openstreetmap.josm.tools.Shortcut;
 /**
  * Merge overlapping part of ways.
  */
-@SuppressWarnings("serial")
 public class MergeOverlapAction extends JosmAction {
 
+    /**
+     * Constructs a new {@code MergeOverlapAction}.
+     */
     public MergeOverlapAction() {
         super(tr("Merge overlap"), "merge_overlap",
                 tr("Merge overlap of ways."), 
                 Shortcut.registerShortcut("tools:mergeoverlap",tr("Tool: {0}", tr("Merge overlap")), KeyEvent.VK_O,
-                Shortcut.ALT_CTRL)
-                , true);
+                Shortcut.ALT_CTRL), true);
     }
 
     Map<Way, List<Relation>> relations = new HashMap<>();
@@ -71,7 +72,7 @@ public class MergeOverlapAction extends JosmAction {
      * @param e
      *            Action Event
      */
-        @Override
+    @Override
     public void actionPerformed(ActionEvent e) {
 
         // List of selected ways
@@ -85,8 +86,7 @@ public class MergeOverlapAction extends JosmAction {
                 Way way = (Way) osm;
                 ways.add(way);
                 List<Relation> rels = new ArrayList<>();
-                for (Relation r : OsmPrimitive.getFilteredList(way
-                        .getReferrers(), Relation.class)) {
+                for (Relation r : OsmPrimitive.getFilteredList(way.getReferrers(), Relation.class)) {
                     rels.add(r);
                 }
                 relations.put(way, rels);
@@ -134,8 +134,7 @@ public class MergeOverlapAction extends JosmAction {
                                 if (follows(way, opositWay, start, node, 1)) {
                                     end = node;
                                     increment = +1;
-                                } else if (follows(way, opositWay, start, node,
-                                        -1)) {
+                                } else if (follows(way, opositWay, start, node, -1)) {
                                     end = node;
                                     increment = -1;
                                 } else {
@@ -143,12 +142,10 @@ public class MergeOverlapAction extends JosmAction {
                                     end = null;
                                 }
                             } else {
-                                if (follows(way, opositWay, end, node,
-                                        increment)) {
+                                if (follows(way, opositWay, end, node, increment)) {
                                     end = node;
                                 } else {
-                                    hasFirst = addNodes(start, end, way, nodes,
-                                            hasFirst);
+                                    hasFirst = addNodes(start, end, way, nodes, hasFirst);
                                     start = node;
                                     end = null;
                                 }
@@ -164,8 +161,7 @@ public class MergeOverlapAction extends JosmAction {
                 }
             }
             if (!nodes.isEmpty() && !way.isClosed() || nodes.size() >= 2) {
-                List<List<Node>> wayChunks = SplitWayAction.buildSplitChunks(
-                        way, new ArrayList<>(nodes));
+                List<List<Node>> wayChunks = SplitWayAction.buildSplitChunks(way, new ArrayList<>(nodes));
                 SplitWayResult result = splitWay(getEditLayer(), way, wayChunks);
 
                 cmds.add(result.getCommand());
@@ -219,7 +215,7 @@ public class MergeOverlapAction extends JosmAction {
                 Pair<Way, List<Command>> combineResult;
                 try {
                     combineResult = combineWaysWorker(combine);
-                } catch (UserCancelException e1) {
+                } catch (UserCancelException ex) {
                     return;
                 }
                 sel.add(combineResult.a);
@@ -242,8 +238,7 @@ public class MergeOverlapAction extends JosmAction {
         }
 
         // Commit
-        Main.main.undoRedo.add(new SequenceCommand(
-                tr("Merge Overlap (combine)"), cmds));
+        Main.main.undoRedo.add(new SequenceCommand(tr("Merge Overlap (combine)"), cmds));
         getCurrentDataSet().setSelected(sel);
         Main.map.repaint();
 
@@ -252,7 +247,7 @@ public class MergeOverlapAction extends JosmAction {
         oldWays.clear();
     }
 
-    private class NodePos {
+    private static class NodePos {
         Node node;
         int pos;
         int opositPos;
@@ -263,7 +258,7 @@ public class MergeOverlapAction extends JosmAction {
             opositPos = op;
         }
 
-                @Override
+        @Override
         public String toString() {
             return "NodePos: " + pos + ", " + opositPos + ", " + node;
         }
@@ -271,15 +266,11 @@ public class MergeOverlapAction extends JosmAction {
 
     private boolean addNodes(NodePos start, NodePos end, Way way,
             Set<Node> nodes, boolean hasFirst) {
-        if (way.isClosed()
-                || (start.node != way.getNode(0) && start.node != way
-                        .getNode(way.getNodesCount() - 1))) {
+        if (way.isClosed() || (start.node != way.getNode(0) && start.node != way.getNode(way.getNodesCount() - 1))) {
             hasFirst = hasFirst || start.node == way.getNode(0);
             nodes.add(start.node);
         }
-        if (way.isClosed()
-                || (end.node != way.getNode(0) && end.node != way.getNode(way
-                        .getNodesCount() - 1))) {
+        if (way.isClosed() || (end.node != way.getNode(0) && end.node != way.getNode(way.getNodesCount() - 1))) {
             if (hasFirst && (end.node == way.getNode(way.getNodesCount() - 1))) {
                 nodes.remove(way.getNode(0));
             } else {
@@ -355,7 +346,7 @@ public class MergeOverlapAction extends JosmAction {
                 type = "";
             }
 
-            int i_c = 0, i_r = 0;
+            int ic = 0, ir = 0;
             List<RelationMember> relationMembers = r.getMembers();
             for (RelationMember rm : relationMembers) {
                 if (rm.isWay() && rm.getMember() == way) {
@@ -425,10 +416,10 @@ public class MergeOverlapAction extends JosmAction {
 
                         Boolean backwards = null;
                         int k = 1;
-                        while (i_r - k >= 0 || i_r + k < relationMembers.size()) {
-                            if ((i_r - k >= 0)
-                                    && relationMembers.get(i_r - k).isWay()) {
-                                Way w = relationMembers.get(i_r - k).getWay();
+                        while (ir - k >= 0 || ir + k < relationMembers.size()) {
+                            if ((ir - k >= 0)
+                                    && relationMembers.get(ir - k).isWay()) {
+                                Way w = relationMembers.get(ir - k).getWay();
                                 if ((w.lastNode() == way.firstNode())
                                         || w.firstNode() == way.firstNode()) {
                                     backwards = false;
@@ -438,9 +429,9 @@ public class MergeOverlapAction extends JosmAction {
                                 }
                                 break;
                             }
-                            if ((i_r + k < relationMembers.size())
-                                    && relationMembers.get(i_r + k).isWay()) {
-                                Way w = relationMembers.get(i_r + k).getWay();
+                            if ((ir + k < relationMembers.size())
+                                    && relationMembers.get(ir + k).isWay()) {
+                                Way w = relationMembers.get(ir + k).getWay();
                                 if ((w.lastNode() == way.firstNode())
                                         || w.firstNode() == way.firstNode()) {
                                     backwards = true;
@@ -453,22 +444,22 @@ public class MergeOverlapAction extends JosmAction {
                             k++;
                         }
 
-                        int j = i_c;
+                        int j = ic;
                         for (Way wayToAdd : newWays) {
                             RelationMember em = new RelationMember(
                                     rm.getRole(), wayToAdd);
                             j++;
                             if ((backwards != null) && backwards) {
-                                c.addMember(i_c, em);
+                                c.addMember(ic, em);
                             } else {
                                 c.addMember(j, em);
                             }
                         }
-                        i_c = j;
+                        ic = j;
                     }
                 }
-                i_c++;
-                i_r++;
+                ic++;
+                ir++;
             }
 
             if (c != null) {
@@ -477,17 +468,15 @@ public class MergeOverlapAction extends JosmAction {
             }
         }
         if (warnmerole) {
-            JOptionPane
-                    .showMessageDialog(
-                            Main.parent,
-                            tr("<html>A role based relation membership was copied to all new ways.<br>You should verify this and correct it when necessary.</html>"),
-                            tr("Warning"), JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                Main.parent,
+                tr("<html>A role based relation membership was copied to all new ways.<br>You should verify this and correct it when necessary.</html>"),
+                tr("Warning"), JOptionPane.WARNING_MESSAGE);
         } else if (warnme) {
-            JOptionPane
-                    .showMessageDialog(
-                            Main.parent,
-                            tr("<html>A relation membership was copied to all new ways.<br>You should verify this and correct it when necessary.</html>"),
-                            tr("Warning"), JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                Main.parent,
+                tr("<html>A relation membership was copied to all new ways.<br>You should verify this and correct it when necessary.</html>"),
+                tr("Warning"), JOptionPane.WARNING_MESSAGE);
         }
 
         return new SplitWayResult(
@@ -572,8 +561,7 @@ public class MergeOverlapAction extends JosmAction {
                     }
                 }
                 wayTags = TagCollection.unionOfAllPrimitives(reversedTagWays);
-                wayTags.add(TagCollection
-                        .unionOfAllPrimitives(unreversedTagWays));
+                wayTags.add(TagCollection.unionOfAllPrimitives(unreversedTagWays));
             }
         }
 
@@ -588,14 +576,11 @@ public class MergeOverlapAction extends JosmAction {
         TagCollection tagsToEdit = new TagCollection(completeWayTags);
         completeTagCollectionForEditing(tagsToEdit);
 
-        MyCombinePrimitiveResolverDialog dialog = MyCombinePrimitiveResolverDialog
-                .getInstance();
-        dialog.getTagConflictResolverModel().populate(tagsToEdit,
-                completeWayTags.getKeysWithMultipleValues());
+        MyCombinePrimitiveResolverDialog dialog = MyCombinePrimitiveResolverDialog.getInstance();
+        dialog.getTagConflictResolverModel().populate(tagsToEdit, completeWayTags.getKeysWithMultipleValues());
         dialog.setTargetPrimitive(targetWay);
         Set<Relation> parentRelations = getParentRelations(ways);
-        dialog.getRelationMemberConflictResolverModel().populate(
-                parentRelations, ways, oldWays);
+        dialog.getRelationMemberConflictResolverModel().populate(parentRelations, ways, oldWays);
         dialog.prepareDefaultDecisions();
 
         // resolve tag conflicts if necessary
@@ -605,7 +590,7 @@ public class MergeOverlapAction extends JosmAction {
                 throw new UserCancelException();
         }
 
-        LinkedList<Command> cmds = new LinkedList<>();
+        List<Command> cmds = new LinkedList<>();
         deletes.addAll(ways);
         deletes.remove(targetWay);
 
@@ -613,15 +598,14 @@ public class MergeOverlapAction extends JosmAction {
         cmds.addAll(dialog.buildWayResolutionCommands());
         dialog.buildRelationCorrespondance(newRelations, oldWays);
 
-        return new Pair<Way, List<Command>>(targetWay, cmds);
+        return new Pair<>(targetWay, cmds);
     }
 
     private static Way getTargetWay(Collection<Way> combinedWays) {
         // init with an arbitrary way
         Way targetWay = combinedWays.iterator().next();
 
-        // look for the first way already existing on
-        // the server
+        // look for the first way already existing on the server
         for (Way w : combinedWays) {
             targetWay = w;
             if (!w.isNew()) {
@@ -686,8 +670,7 @@ public class MergeOverlapAction extends JosmAction {
         return getNew(r, newRelations);
     }
 
-    public static Relation getNew(Relation r,
-            Map<Relation, Relation> newRelations) {
+    public static Relation getNew(Relation r, Map<Relation, Relation> newRelations) {
         if (newRelations.containsValue(r)) {
             return r;
         } else {
@@ -715,7 +698,7 @@ public class MergeOverlapAction extends JosmAction {
      * @return the set of referring relations
      */
     private Set<Relation> getParentRelations(Collection<Way> ways) {
-        HashSet<Relation> ret = new HashSet<>();
+        Set<Relation> ret = new HashSet<>();
         for (Way w : ways) {
             ret.addAll(getParentRelations(w));
         }
